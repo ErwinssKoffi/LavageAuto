@@ -1,301 +1,79 @@
-/**
- * Page d'accueil publique : vitrine du produit sur fond « BackgroundBeams ».
- *
- * Refonte : décor de faisceaux animés en pleine page (héro inclus), sections en
- * vitrine posées par-dessus, apparitions au défilement. Les blocs « aperçu »
- * restent des maquettes en CSS (aucune donnée réelle) : la page reste légère.
- */
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight, BarChart3, CheckCircle2, Droplets, ShieldCheck, Smartphone, Sparkles, Wallet } from 'lucide-react'
+import { ArrowRight, Check, ChevronDown, Menu, Moon, Play, Sun, X } from 'lucide-react'
 
-import { BackgroundBeams } from '@/components/BackgroundBeams'
 import { Brand } from '@/components/Brand'
-import { Reveal } from '@/components/ui'
 import { Button } from '@/components/ui/primitives'
 import { useAuth } from '@/hooks/useAuth'
 import { usePageTitle } from '@/hooks/usePageTitle'
-import { DUR, EASE_SOFT, stagger } from '@/lib/motion'
+import { useTheme } from '@/hooks/useStation'
+
+const BENEFITS = [
+  ['01', 'Plus de lavages, moins d’attente', 'Organisez la file, affectez les prestations et gardez chaque véhicule en mouvement.'],
+  ['02', 'Une caisse toujours maîtrisée', 'Chaque encaissement, remise et commission est tracé pour supprimer les oublis et les écarts.'],
+  ['03', 'Décidez avec vos vrais chiffres', 'Suivez votre chiffre d’affaires, vos services les plus rentables et la performance de votre équipe en temps réel.'],
+  ['04', 'Fidélisez sans effort', 'Retrouvez l’historique de chaque client et offrez une expérience assez fluide pour donner envie de revenir.'],
+]
 
 const FEATURES = [
-  {
-    icon: <Droplets size={19} />,
-    title: 'Fiches de lavage',
-    text: 'Créez une fiche en quelques secondes, suivez son avancement et l’attribution aux laveurs.',
-  },
-  {
-    icon: <Wallet size={19} />,
-    title: 'Caisse fiable',
-    text: 'Ouverture et clôture avec comptage, écarts signalés automatiquement au gérant.',
-  },
-  {
-    icon: <BarChart3 size={19} />,
-    title: 'Rapports clairs',
-    text: 'Chiffre d’affaires, dépenses, top services et commissions — chaque jour.',
-  },
-  {
-    icon: <ShieldCheck size={19} />,
-    title: 'Rôles tracés',
-    text: 'Caissier, gérant, laveur : chacun son écran, chaque action dans le journal d’audit.',
-  },
+  ['Un parcours 100 % digital', 'De l’arrivée du client au reçu, chaque étape est enregistrée dans un espace unique et accessible.'],
+  ['Une équipe alignée', 'Les rôles, les prestations et les priorités sont visibles par tous, sur mobile, tablette ou ordinateur.'],
+  ['Des rapports qui parlent', 'Transformez vos opérations quotidiennes en décisions concrètes pour augmenter votre rentabilité.'],
+  ['Une station prête à grandir', 'Commencez avec une station et déployez les mêmes standards sur plusieurs sites.'],
 ]
 
-const ETAPES = [
-  // Ce qui est annoncé ici doit être ce que le produit fait : le catalogue
-  // arrive **sans prix** (aucun tarif n'est inventé) et la station n'ouvre
-  // qu'après la mise en route. Une promesse plus flatteuse serait un mensonge
-  // que la première minute d'utilisation démentirait.
-  { titre: 'Créez votre espace', texte: 'Inscription en deux minutes : votre entreprise, votre station et un catalogue de 18 prestations à tarifer à vos prix.' },
-  { titre: 'Mettez en route', texte: 'Horaires, catégories de véhicules, grille tarifaire : treize étapes constatées par le serveur, puis l’activation de la station.' },
-  { titre: 'Encaissez au guichet', texte: 'Fiche de lavage, encaissement espèces ou mobile money, caisse ouverte et suivie.' },
-  { titre: 'Pilotez vos chiffres', texte: 'Rapports du jour, commissions des laveurs et objectif mensuel, sans tableur.' },
-]
-
-/** Barres de l'aperçu : hauteurs relatives, purement décoratives. */
-const APERCU = [42, 58, 36, 72, 54, 88, 64]
-
-export default function LandingPage() {
-  const { me } = useAuth()
-  usePageTitle('Accueil')
-
+function DashboardPreview() {
   return (
-    <div className="min-h-dvh overflow-x-clip bg-canvas">
-      <header className="sticky top-0 z-30 border-b border-line/70 bg-canvas/70 backdrop-blur-glass">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-          <Link to="/">
-            <Brand />
-          </Link>
-          <div className="flex items-center gap-2">
-            <span className="badge badge-success hidden sm:inline-flex">
-              <span className="dot" aria-hidden="true" />
-              Essai gratuit 14 jours
-            </span>
-            <Link to={me ? '/tableau-de-bord' : '/connexion'}>
-              <Button variant="primary" size="sm" icon={<ArrowRight size={15} />}>
-                {me ? 'Mon espace' : 'Se connecter'}
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* --- Héros : plein écran sur le décor de faisceaux ---------------- */}
-      <section className="relative flex min-h-[calc(100dvh-57px)] items-center overflow-hidden">
-        <BackgroundBeams className="opacity-90" />
-        {/* Voile sombre pour garder le texte lisible sur les faisceaux. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_60%_at_50%_40%,transparent_0%,var(--app-bg)_85%)]"
-        />
-
-        <div className="relative mx-auto w-full max-w-6xl px-4 py-20">
-          <motion.div
-            variants={stagger(0.07, 0.05)}
-            initial="hidden"
-            animate="visible"
-            className="mx-auto max-w-2xl text-center"
-          >
-            <motion.span
-              variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0 } }}
-              className="badge badge-brand"
-            >
-              <Sparkles size={12} />
-              Pensé pour les stations d’Afrique de l’Ouest
-            </motion.span>
-            <motion.h1
-              variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE_SOFT } } }}
-              className="mt-5 text-4xl font-bold leading-[1.12] tracking-tight text-ink sm:text-5xl lg:text-6xl"
-            >
-              Pilotez votre station de lavage,{' '}
-              <span className="bg-gradient-to-r from-brand via-info to-success bg-clip-text text-transparent">
-                sans tableur.
-              </span>
-            </motion.h1>
-            <motion.p
-              variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }}
-              className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-ink-muted sm:text-lg"
-            >
-              Lavages, caisse, dépenses, commissions et rapports — une application pensée pour les
-              stations d’Afrique de l’Ouest, en FCFA, utilisable depuis un téléphone au guichet.
-            </motion.p>
-            <motion.div
-              variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }}
-              className="mt-8 flex flex-wrap items-center justify-center gap-3"
-            >
-              <Link to="/inscription">
-                <Button variant="primary" size="lg" icon={<Sparkles size={16} />}>
-                  Commencer maintenant
-                </Button>
-              </Link>
-              <Link to="/connexion">
-                <Button variant="secondary" size="lg">
-                  J’ai déjà un compte
-                </Button>
-              </Link>
-            </motion.div>
-            <motion.ul
-              variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
-              className="mt-8 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-ink-muted"
-            >
-              {['Montants en FCFA', 'Rôles séparés par station', 'Journal d’audit'].map((item) => (
-                <li key={item} className="flex items-center gap-1.5">
-                  <CheckCircle2 size={14} className="text-success" />
-                  {item}
-                </li>
-              ))}
-            </motion.ul>
-          </motion.div>
-
-          {/* Aperçu de l'application : maquette en CSS, sans donnée réelle. */}
-          <motion.div
-            initial={{ opacity: 0, y: 24, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.6, ease: EASE_SOFT, delay: 0.35 }}
-            className="relative mx-auto mt-14 max-w-xl"
-          >
-            <div className="card hairline-highlight overflow-hidden p-4 shadow-float">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="stat-label">Recette du jour</p>
-                  <p className="stat-value mt-1 text-brand">184 500 FCFA</p>
-                </div>
-                <span className="badge badge-success">+12 % vs hier</span>
-              </div>
-              <div className="mt-4 flex h-32 items-end gap-2">
-                {APERCU.map((hauteur, index) => (
-                  <motion.span
-                    key={index}
-                    initial={{ height: 0, opacity: 0.4 }}
-                    animate={{ height: `${hauteur}%`, opacity: 1 }}
-                    transition={{ duration: DUR.chart, ease: EASE_SOFT, delay: 0.3 + index * 0.06 }}
-                    className="flex-1 rounded-t-md bg-gradient-to-t from-brand/35 to-brand shadow-e1"
-                  />
-                ))}
-              </div>
-              <div className="mt-4 grid grid-cols-3 gap-2.5">
-                {[
-                  { label: 'Lavages', valeur: '37' },
-                  { label: 'Caisse', valeur: 'Ouverte' },
-                  { label: 'Reste dû', valeur: '6 000' },
-                ].map((bloc) => (
-                  <div key={bloc.label} className="panel-inset px-2.5 py-2">
-                    <p className="text-[0.6875rem] text-ink-muted">{bloc.label}</p>
-                    <p className="tabular mt-0.5 text-sm font-semibold text-ink">{bloc.valeur}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div
-              aria-hidden="true"
-              className="animate-float-slow absolute -right-4 -top-4 hidden rounded-card border border-line bg-surface px-3 py-2 shadow-e3 sm:block"
-            >
-              <p className="text-[0.6875rem] text-ink-muted">Commission laveur</p>
-              <p className="tabular text-sm font-semibold text-success">500 FCFA</p>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* --- Contenu : sections posées sur fond clair ----------------------- */}
-      <main className="relative mx-auto max-w-6xl px-4">
-        {/* --- Fonctions --------------------------------------------------- */}
-        <section className="py-6">
-          <Reveal>
-            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-subtle">
-              Ce que fait WashGuard
-            </p>
-          </Reveal>
-          <motion.div
-            variants={stagger(0.08, 0.05)}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-80px' }}
-            className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
-          >
-            {FEATURES.map((feature) => (
-              <motion.div
-                key={feature.title}
-                variants={{ hidden: { opacity: 0, y: 14 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE_SOFT } } }}
-                whileHover={{ y: -3 }}
-                className="card card-interactive p-5"
-              >
-                <span className="flex h-10 w-10 items-center justify-center rounded-card border border-brand/25 bg-brand-soft text-brand shadow-e1">
-                  {feature.icon}
-                </span>
-                <p className="mt-3 font-semibold text-ink">{feature.title}</p>
-                <p className="mt-1 text-sm leading-relaxed text-ink-muted">{feature.text}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </section>
-
-        {/* --- Étapes ------------------------------------------------------ */}
-        <section className="py-10">
-          <Reveal>
-            <div className="card overflow-hidden p-6 sm:p-8">
-              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-subtle">
-                Quatre étapes, une journée
-              </p>
-              <div className="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                {ETAPES.map((etape, index) => (
-                  <motion.div
-                    key={etape.titre}
-                    initial={{ opacity: 0, y: 12 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: '-60px' }}
-                    transition={{ duration: 0.45, ease: EASE_SOFT, delay: index * 0.1 }}
-                  >
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-surface-muted text-sm font-semibold text-brand shadow-e1">
-                      {index + 1}
-                    </span>
-                    <p className="mt-3 font-semibold text-ink">{etape.titre}</p>
-                    <p className="mt-1 text-sm leading-relaxed text-ink-muted">{etape.texte}</p>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </Reveal>
-        </section>
-
-        {/* --- Appel à l'action -------------------------------------------- */}
-        <Reveal>
-          <section className="relative overflow-hidden rounded-panel border border-line bg-surface p-8 text-center shadow-e3">
-            <BackgroundBeams className="opacity-70" />
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand/10 via-transparent to-success/10"
-            />
-            <div className="relative">
-              <p className="text-xl font-bold tracking-tight text-ink sm:text-2xl">
-                Ouvrez votre espace aujourd’hui
-              </p>
-              <p className="mx-auto mt-2 max-w-lg text-sm text-ink-muted">
-                Essai gratuit de 14 jours, sans carte bancaire. Vos données restent les vôtres, et
-                vous pouvez exporter vos rapports à tout moment.
-              </p>
-              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-                <Link to="/inscription">
-                  <Button variant="primary" size="lg" icon={<ArrowRight size={16} />}>
-                    Créer mon espace
-                  </Button>
-                </Link>
-                <Link to="/connexion">
-                  <Button variant="ghost" size="lg">
-                    Se connecter
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </section>
-        </Reveal>
-      </main>
-
-      <footer className="mt-12 border-t border-line py-6">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 text-xs text-ink-muted">
-          <Brand size="sm" />
-          <p>WashGuard — la gestion simple des stations de lavage. Abidjan, Côte d’Ivoire.</p>
-        </div>
-      </footer>
+    <div className="relative mx-auto mt-16 max-w-5xl overflow-hidden rounded-t-[1.25rem] border border-orange-500/40 bg-[#11100f] text-left shadow-[0_-20px_90px_rgba(249,81,10,.18)]">
+      <div className="flex h-10 items-center gap-6 border-b border-white/10 px-5 text-[11px] font-medium text-white/60">
+        <span className="font-semibold text-white">WashGuard</span><span>Tableau de bord</span><span>Lavages</span><span>Rapports</span><span>Paramètres</span>
+      </div>
+      <div className="grid min-h-[330px] grid-cols-[170px_1fr]">
+        <aside className="border-r border-white/10 bg-black/20 p-5">
+          <p className="text-xs font-semibold text-white">Aujourd&apos;hui</p>
+          <div className="mt-5 space-y-2 text-xs text-white/50"><div className="rounded-md bg-white/10 px-3 py-2 text-white">Vue d&apos;ensemble</div><div className="px-3 py-2">Nouveaux lavages</div><div className="px-3 py-2">Caisse</div><div className="px-3 py-2">Équipe</div></div>
+        </aside>
+        <div className="p-6"><div className="flex items-start justify-between"><div><p className="text-xs text-white/45">Bonjour, WashGuard</p><h3 className="mt-1 text-xl font-semibold text-white">Votre station en un coup d&apos;œil</h3></div><div className="rounded-md bg-orange-500 px-3 py-2 text-xs font-semibold text-white">+ Nouveau lavage</div></div><div className="mt-6 grid gap-3 sm:grid-cols-3">{[['Recette du jour','184 500 FCFA'],['Lavages réalisés','37'],['Panier moyen','4 986 FCFA']].map(([label,value])=><div key={label} className="rounded-lg border border-white/10 bg-white/[.03] p-4"><p className="text-[11px] text-white/45">{label}</p><p className="mt-2 text-lg font-semibold text-white">{value}</p><p className="mt-1 text-[10px] text-emerald-400">+12% vs hier</p></div>)}</div><div className="mt-5 rounded-lg border border-white/10 bg-white/[.02] p-4"><div className="flex justify-between text-xs text-white/60"><span>Activité de la semaine</span><span>Cette semaine</span></div><div className="mt-5 flex h-24 items-end gap-3">{[35,55,42,75,58,88,68,96,72,84,63,91].map((height,index)=><span key={index} className="flex-1 rounded-t bg-gradient-to-t from-orange-600 to-orange-300" style={{height:`${height}%`}} />)}</div></div></div>
+      </div>
     </div>
   )
 }
+
+export default function LandingPage() {
+  const { me } = useAuth()
+  const { theme, toggle } = useTheme()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
+  usePageTitle('Accueil')
+
+  return <div className="min-h-dvh overflow-x-hidden bg-[#0a0908] text-white selection:bg-orange-500/30">
+    <header className="sticky top-4 z-40 mx-auto flex max-w-6xl items-center justify-between rounded-2xl border border-white/10 bg-[#121110]/90 px-4 py-3 backdrop-blur-xl sm:px-5">
+      <Link to="/" aria-label="WashGuard accueil"><Brand /></Link>
+      <nav className="hidden items-center gap-7 text-sm text-white/75 md:flex"><a href="#benefits" className="transition hover:text-white">La plateforme</a><a href="#testimonials" className="transition hover:text-white">Témoignages</a><a href="#team" className="transition hover:text-white">Équipe</a><a href="#contact" className="transition hover:text-white">Contact</a><a href="#faq" className="transition hover:text-white">FAQ</a></nav>
+      <div className="flex items-center gap-2"><button onClick={toggle} aria-label="Changer de thème" className="hidden rounded-lg p-2 text-white/75 transition hover:bg-white/10 hover:text-white sm:block">{theme === 'dark' ? <Sun size={17}/> : <Moon size={17}/>}</button><a href="https://github.com/ErwinssKoffi/LavageAuto" target="_blank" rel="noreferrer" aria-label="Voir le projet sur GitHub" className="hidden rounded-lg p-2 text-white/75 transition hover:bg-white/10 hover:text-white sm:block"><span className="text-[11px] font-bold">GH</span></a><button onClick={()=>setMenuOpen(!menuOpen)} className="rounded-lg p-2 text-white md:hidden" aria-label="Menu">{menuOpen?<X size={19}/>:<Menu size={19}/>}</button></div>
+      {menuOpen && <nav className="absolute left-0 right-0 top-16 flex flex-col gap-4 rounded-xl border border-white/10 bg-[#151311] p-5 text-sm md:hidden"><a href="#benefits" onClick={()=>setMenuOpen(false)}>La plateforme</a><a href="#testimonials" onClick={()=>setMenuOpen(false)}>Témoignages</a><a href="#team" onClick={()=>setMenuOpen(false)}>Équipe</a><a href="#contact" onClick={()=>setMenuOpen(false)}>Contact</a><a href="#faq" onClick={()=>setMenuOpen(false)}>FAQ</a></nav>}
+    </header>
+
+    <main>
+      <section className="relative px-4 pb-0 pt-28 text-center sm:pt-36"><div className="pointer-events-none absolute inset-x-0 top-16 mx-auto h-96 max-w-4xl bg-[radial-gradient(ellipse_at_center,rgba(249,81,10,.18),transparent_65%)]"/><div className="relative mx-auto max-w-4xl"><span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[.03] px-3 py-1.5 text-xs text-white/90"><span className="rounded-full bg-orange-500 px-2 py-0.5 font-semibold">Nouveau</span> Le digital au service de votre station</span><h1 className="mx-auto mt-9 max-w-4xl text-5xl font-bold leading-[.98] tracking-[-.055em] sm:text-7xl lg:text-[5.7rem]">Transformez votre station<br/>en <span className="bg-gradient-to-r from-pink-500 via-orange-500 to-orange-300 bg-clip-text text-transparent">business rentable.</span></h1><p className="mx-auto mt-7 max-w-2xl text-base leading-7 text-white/55 sm:text-lg">WashGuard digitalise toute votre activité : accueillez plus vite, encaissez sans erreur, fidélisez vos clients et pilotez votre rentabilité depuis une seule application.</p><div className="mt-8 flex flex-wrap justify-center gap-3"><Link to="/inscription"><Button variant="primary" size="lg" icon={<ArrowRight size={16}/>}>Commencer maintenant</Button></Link><a href="#benefits" className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[.06] px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"><Play size={15} fill="currentColor"/> Découvrir WashGuard</a></div></div><DashboardPreview/></section>
+
+      <section className="mx-auto max-w-6xl px-4 py-20 text-center"><p className="text-xs uppercase tracking-[.22em] text-white/35">Ils construisent leur activité avec nous</p><div className="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-5 text-lg font-semibold text-white/25"><span>CARWASH+</span><span>AutoClean</span><span>STATION 24</span><span>WashPro</span><span>Abidjan Auto</span><span>Élite Lavage</span></div></section>
+
+      <section id="benefits" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-20"><div className="max-w-2xl"><p className="text-sm font-semibold text-orange-400">Les bénéfices</p><h2 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">Chaque lavage mieux organisé devient une croissance mesurable.</h2><p className="mt-5 text-white/50">Laissez le papier, les messages dispersés et les approximations derrière vous. WashGuard donne à votre équipe un système simple pour mieux servir et mieux gagner.</p></div><div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{BENEFITS.map(([number,title,text])=><motion.article whileHover={{y:-5}} key={number} className="rounded-xl border border-white/10 bg-white/[.025] p-6 transition hover:border-orange-500/40"><span className="text-xs text-orange-400">{number}</span><h3 className="mt-12 text-lg font-semibold">{title}</h3><p className="mt-3 text-sm leading-6 text-white/45">{text}</p></motion.article>)}</div></section>
+
+      <section className="mx-auto max-w-6xl px-4 py-20"><div className="grid gap-12 lg:grid-cols-[.8fr_1.2fr] lg:items-end"><div><p className="text-sm font-semibold text-orange-400">Fonctionnalités</p><h2 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">Le cockpit digital de votre station.</h2><p className="mt-5 text-white/50">Un seul outil pour standardiser vos opérations, responsabiliser votre équipe et offrir une expérience client qui se remarque.</p></div><div className="grid gap-x-8 gap-y-9 sm:grid-cols-2">{FEATURES.map(([title,text])=><div key={title} className="border-t border-white/10 pt-4"><h3 className="font-semibold">{title}</h3><p className="mt-2 text-sm leading-6 text-white/45">{text}</p></div>)}</div></div></section>
+
+      <section id="testimonials" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-20"><div className="rounded-2xl border border-white/10 bg-gradient-to-br from-orange-500/15 via-white/[.03] to-pink-500/10 p-8 sm:p-14"><p className="text-sm text-orange-300">Témoignages</p><blockquote className="mt-8 max-w-4xl text-3xl font-semibold leading-tight tracking-tight sm:text-5xl">“Avant WashGuard, nous pilotions au feeling. Aujourd&apos;hui, nous savons combien de véhicules sont passés, ce que nous avons vendu et où agir pour faire progresser la station.”</blockquote><p className="mt-8 text-sm text-white/55">Aïcha K. · Gérante, station automobile à Abidjan</p></div></section>
+
+      <section id="team" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-20 text-center"><p className="text-sm font-semibold text-orange-400">L&apos;équipe</p><h2 className="mt-3 text-4xl font-bold tracking-tight">Pensé avec le terrain.</h2><p className="mx-auto mt-4 max-w-xl text-white/50">Nous construisons des outils simples pour les équipes qui font avancer les stations chaque jour.</p><div className="mt-10 flex justify-center gap-4"><div className="rounded-xl border border-white/10 bg-white/[.03] px-6 py-5"><div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-pink-500 font-bold">WG</div><p className="mt-3 text-sm font-semibold">L&apos;équipe WashGuard</p><p className="mt-1 text-xs text-white/45">Produit · Design · Terrain</p></div></div></section>
+
+      <section id="faq" className="mx-auto max-w-3xl scroll-mt-24 px-4 py-20"><div className="text-center"><p className="text-sm font-semibold text-orange-400">FAQ</p><h2 className="mt-3 text-4xl font-bold">Les réponses avant de vous lancer.</h2></div><div className="mt-10 divide-y divide-white/10 border-y border-white/10">{['Puis-je essayer WashGuard gratuitement ?','Est-ce adapté à une petite station ?','Mes données sont-elles sécurisées ?','Puis-je utiliser l’application sur mobile ?'].map((question,index)=><div key={question}><button onClick={()=>setOpenFaq(openFaq===index?null:index)} className="flex w-full items-center justify-between py-5 text-left text-sm font-medium"><span>{question}</span><ChevronDown size={17} className={openFaq===index?'rotate-180 text-orange-400':'text-white/40'}/></button>{openFaq===index&&<p className="pb-5 text-sm leading-6 text-white/50">Oui. WashGuard est conçu pour démarrer simplement, sans bouleverser vos habitudes : vous créez votre espace, configurez vos prestations et votre équipe peut commencer à enregistrer les lavages immédiatement.</p>}</div>)}</div></section>
+
+      <section id="contact" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-20"><div className="relative overflow-hidden rounded-2xl border border-orange-500/30 bg-gradient-to-r from-orange-500/20 to-pink-500/10 px-6 py-16 text-center sm:px-10"><div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,150,80,.25),transparent_55%)]"/><div className="relative"><h2 className="text-4xl font-bold tracking-tight sm:text-5xl">Votre prochaine journée de lavage peut commencer autrement.</h2><p className="mx-auto mt-4 max-w-xl text-white/55">Passez d&apos;une gestion dispersée à une station pilotée par la donnée. Créez votre espace WashGuard et prenez le contrôle de votre activité.</p><Link to={me?'/tableau-de-bord':'/inscription'} className="mt-8 inline-flex"><Button variant="primary" size="lg" icon={<ArrowRight size={16}/>}>{me?'Accéder à mon espace':'Créer mon espace'}</Button></Link></div></div></section>
+    </main>
+
+    <footer className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 border-t border-white/10 px-4 py-8 text-xs text-white/40"><Brand size="sm"/><p>WashGuard — la gestion simple des stations de lavage.</p><div className="flex items-center gap-4"><span className="inline-flex items-center gap-1.5"><Check size={13} className="text-emerald-400"/> Fait pour le terrain</span><span>© 2026</span></div></footer>
+  </div>
+}
+
