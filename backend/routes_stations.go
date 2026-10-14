@@ -694,6 +694,18 @@ func (a *App) enregistrerHoraires(w http.ResponseWriter, r *http.Request, sess *
 	}
 	ctx := r.Context()
 	champs := map[string]string{}
+	organisationID := orElse(sess.OrganizationID, "")
+	reservationDemandee := false
+	for _, jour := range corps.Days {
+		if jour.BookingAllowed != nil && *jour.BookingAllowed {
+			reservationDemandee = true
+			break
+		}
+	}
+	if reservationDemandee && !a.planAutoriseFeature(ctx, organisationID, "online_booking") {
+		repondreErreur(w, http.StatusForbidden, "feature_not_in_plan", "Les réservations en ligne sont disponibles à partir du plan Pro.")
+		return
+	}
 
 	validerLigne := func(nom string, ouvert bool, o, f, pauseD, pauseF, dernier string) {
 		if !ouvert {
