@@ -20,6 +20,44 @@ import (
 // support.go — outils communs à tous les handlers : journal d'audit,
 // vérification d'appartenance des objets, et amorçage des référentiels.
 
+// planAutoriseFeature centralise le contrôle des fonctionnalités facturées.
+// Les droits d'abonnement sont vérifiés côté serveur : l'interface ne peut
+// jamais débloquer seule une fonctionnalité payante.
+func (a *App) planAutoriseFeature(ctx context.Context, organizationID, feature string) bool {
+	minimum := map[string]string{
+		"dashboard_basic": "free",
+		"dashboard_advanced": "pro",
+		"reports_advanced": "pro",
+		"reports_export": "pro",
+		"online_booking": "pro",
+		"loyalty_program": "pro",
+		"customer_history_advanced": "pro",
+		"employee_management_advanced": "pro",
+		"multiple_stations": "business",
+		"consolidated_dashboard": "business",
+		"advanced_permissions": "business",
+		"audit_log": "business",
+		"api_access": "business",
+		"scheduled_reports": "business",
+		"priority_support": "pro",
+	}
+	required, ok := minimum[feature]
+	if !ok {
+		return false
+	}
+	var code, status string
+	err := a.db.QueryRow(ctx, `
+		SELECT p.code, s.status
+		FROM subscriptions s JOIN plans p ON p.id = s.plan_id
+		WHERE s.organization_id = $1
+		ORDER BY s.created_at DESC LIMIT 1`, organizationID).Scan(&code, &status)
+	if err != nil || (status != "trialing" && status != "active" && status != "past_due") {
+		return false
+	}
+	rank := map[string]int{"decouverte": 0, "free": 0, "pro": 1, "professionnel": 1, "reseau": 2, "business": 2}
+	return rank[code] >= rank[required]
+}
+
 func (a *App) journaliser(ctx context.Context, organizationID, stationID *string, actorID *string, action string, detail map[string]interface{}) {
 	if detail == nil {
 		detail = map[string]interface{}{}
