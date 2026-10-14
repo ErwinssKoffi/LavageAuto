@@ -51,6 +51,8 @@ const PLAN_RANK: Record<PlanCode, number> = { free: 0, pro: 1, business: 2 }
 export function normalizePlanCode(code: string | undefined | null): PlanCode {
   if (code === 'pro') return 'pro'
   if (code === 'business' || code === 'reseau') return 'business'
+  if (code === 'pro' || code === 'professionnel') return 'pro'
+  if (code === 'free' || code === 'decouverte' || code === 'discovery') return 'free'
   return 'free'
 }
 
@@ -304,10 +306,6 @@ export function planHasFeature(plan: PlanCode, feature: FeatureCode): boolean {
   return planIncludesFeature(plan, feature)
 }
 
-export function getEntitlement(feature: FeatureCode): FeatureDefinition {
-  return FEATURE_CATALOG[feature]
-}
-
 export function listEntitlements(): FeatureDefinition[] {
   return featureCatalog()
 }
@@ -426,10 +424,6 @@ export function isAboveFree(subscription: Subscription | null | undefined): bool
 
 export function isBusiness(subscription: Subscription | null | undefined): boolean {
   return isAtLeastPlan(subscription, 'business')
-}
-
-export function getFeatureMinimumPlan(feature: FeatureCode): PlanCode {
-  return FEATURE_CATALOG[feature].minimumPlan
 }
 
 export function featureIsEnabled(subscription: Subscription | null | undefined, feature: FeatureCode): boolean {
@@ -757,10 +751,6 @@ export function getFeatureAccess(subscription: Subscription | null | undefined, 
   return hasFeature(subscription, feature)
 }
 
-export function getFeatureMinimumPlan(feature: FeatureCode): PlanCode {
-  return featureMinimumPlan(feature)
-}
-
 export function getFeatureUpgradePlan(feature: FeatureCode): PlanCode {
   return featureMinimumPlan(feature)
 }
@@ -1047,10 +1037,6 @@ export function getCurrentPlan(subscription: Subscription | null | undefined): P
 
 export function getCurrentPlanLabel(subscription: Subscription | null | undefined): string {
   return currentPlanLabel(subscription)
-}
-
-export function getEntitlement(feature: FeatureCode): FeatureDefinition {
-  return featureDefinition(feature)
 }
 
 export function planMinimum(feature: FeatureCode): PlanCode {
