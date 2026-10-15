@@ -230,80 +230,83 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-start py-8 px-4 sm:px-6">
-      <div className="w-full max-w-2xl space-y-6">
+    <div className="relative flex min-h-dvh flex-col items-center overflow-hidden px-4 py-6 sm:px-6 lg:py-10">
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-[radial-gradient(circle_at_50%_-20%,color-mix(in_srgb,var(--brand)_25%,transparent),transparent_68%)]" />
+      <div className="w-full max-w-[1180px] space-y-7">
+        <nav aria-label="Étapes de configuration" className="flex gap-3 overflow-x-auto pb-1">
+          {etapes.slice(0, 5).map((step, index) => {
+            const isActive = etapeOuverte === step.code
+            return (
+              <button
+                key={step.code}
+                type="button"
+                onClick={() => setEtapeOuverte(step.code)}
+                className={cn(
+                  'shrink-0 rounded-2xl border px-5 py-3 text-base font-medium transition-all duration-200 sm:text-lg',
+                  isActive
+                    ? 'border-ink bg-ink text-background shadow-e2'
+                    : 'border-line bg-surface/70 text-ink-muted hover:border-ink/40 hover:bg-surface hover:text-ink'
+                )}
+              >
+                {step.title.replace(/^\d+\.\s*/, '').split(' — ')[0] || `Section ${index + 1}`}
+              </button>
+            )
+          })}
+        </nav>
 
-        {/* =========================================================================
-            HEADER DE MISE EN ROUTE (@blocks-so/onboarding-02 style)
-            ========================================================================= */}
-        <div className="rounded-2xl border border-line bg-surface p-6 shadow-e2 transition-colors">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="flex size-8 items-center justify-center rounded-lg bg-brand-soft text-brand">
+        <motion.header
+          initial={{ opacity: 0, y: -14 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative overflow-hidden rounded-2xl border border-line bg-surface/40 p-5 shadow-e1 sm:p-7"
+        >
+          <div className="absolute -right-24 -top-24 size-64 rounded-full bg-brand/10 blur-3xl" />
+          <div className="relative flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand/25 bg-brand-soft/60 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-brand">
+                <span className="size-1.5 animate-pulse rounded-full bg-brand" /> Configuration intelligente
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-brand text-brand-ink shadow-e-glow">
                   <IconRocket className="size-5" />
                 </span>
-                <h1 className="text-xl font-bold tracking-tight text-ink">
-                  Mise en route de votre station
-                </h1>
+                <div>
+                  <h1 className="text-2xl font-bold tracking-[-0.04em] text-ink sm:text-3xl">
+                    Préparez votre station à performer.
+                  </h1>
+                  <p className="mt-2 max-w-xl text-sm leading-6 text-ink-muted">
+                    En quelques étapes, construisez votre espace de travail, automatisez vos opérations et lancez une expérience client fluide dès le premier lavage.
+                  </p>
+                </div>
               </div>
-              <p className="mt-2 text-sm leading-relaxed text-ink-muted">
-                Configurez pas à pas vos tarifs, vos horaires, vos véhicules et vos moyens de paiement.
-                Chaque étape est enregistrée et validée directement par le système.
-              </p>
             </div>
 
-            {etatActif ? (
-              <Badge tone="success" dot className="shrink-0">
-                En exploitation
-              </Badge>
-            ) : allRequiredDone ? (
-              <Badge tone="success" dot className="shrink-0 animate-pulse">
-                Prête à activer
-              </Badge>
-            ) : (
-              <Badge tone="brand" dot className="shrink-0">
-                {pourcent} %
-              </Badge>
-            )}
-          </div>
-
-          {/* Barre de progression avec repères chiffrés */}
-          <div className="mt-5 border-t border-line/60 pt-4">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-ink-muted">
-                {allRequiredDone ? (
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                    <IconCircleCheckFilled className="size-4" />
-                    Toutes les étapes requises sont prêtes 🎉
-                  </span>
-                ) : (
-                  <>
-                    <span className="font-semibold text-ink">
-                      {requiredDoneCount}
-                    </span>{' '}
-                    sur <span className="font-semibold text-ink">{requiredCount}</span> étapes obligatoires complétées
-                  </>
-                )}
-              </span>
-              <span className="font-semibold text-ink">
-                {completedCount} / {totalEtapes} au total
-              </span>
-            </div>
-
-            <div className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-surface-muted border border-line/50">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-brand to-emerald-500 transition-all duration-500"
-                style={{ width: `${Math.max(4, pourcent)}%` }}
-              />
+            <div className="flex items-center gap-3 rounded-2xl border border-line bg-surface-muted/70 p-3 shadow-e1">
+              <div className="relative flex size-16 items-center justify-center rounded-full bg-surface text-lg font-bold text-ink shadow-e1">
+                <svg className="absolute inset-0 size-16 -rotate-90" viewBox="0 0 36 36" aria-hidden="true">
+                  <path className="fill-none stroke-line" strokeWidth="3" d="M18 2.5a15.5 15.5 0 1 1 0 31a15.5 15.5 0 1 1 0-31" />
+                  <path className="fill-none stroke-brand transition-all duration-700" strokeLinecap="round" strokeWidth="3" strokeDasharray={`${Math.max(4, pourcent)}, 100`} d="M18 2.5a15.5 15.5 0 1 1 0 31a15.5 15.5 0 1 1 0-31" />
+                </svg>
+                {pourcent}%
+              </div>
+              <div className="pr-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-ink-subtle">Progression</p>
+                <p className="mt-1 text-sm font-semibold text-ink">{completedCount} / {totalEtapes} modules prêts</p>
+                <p className="mt-0.5 text-xs text-ink-muted">{requiredDoneCount} étapes essentielles validées</p>
+              </div>
             </div>
           </div>
 
-          {/* Filtres rapides */}
-          <div className="mt-4 flex flex-wrap items-center gap-1.5 pt-1 text-xs">
-            <span className="inline-flex items-center gap-1 text-ink-subtle mr-1">
-              <IconFilter className="size-3.5" /> Filtrer :
-            </span>
+          <div className="mt-7 h-2 overflow-hidden rounded-full bg-surface-muted ring-1 ring-inset ring-line/60">
+            <motion.div initial={{ width: 0 }} animate={{ width: `${Math.max(4, pourcent)}%` }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} className="h-full rounded-full bg-gradient-to-r from-brand via-cyan-400 to-emerald-400 shadow-e-glow" />
+          </div>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-ink-muted">
+            <span>{allRequiredDone ? 'Toutes les étapes essentielles sont prêtes.' : 'Commencez par les étapes essentielles, puis personnalisez votre station.'}</span>
+            {etatActif && <Badge tone="success" dot>Station active</Badge>}
+            {!etatActif && allRequiredDone && <Badge tone="success" dot>Prête à activer</Badge>}
+          </div>
+
+          <div className="mt-6 flex flex-wrap items-center gap-1.5 border-t border-line/60 pt-4 text-xs">
+            <span className="mr-1 inline-flex items-center gap-1 text-ink-subtle"><IconFilter className="size-3.5" /> Afficher</span>
             <button
               type="button"
               onClick={() => setFiltre('tous')}
@@ -341,12 +344,12 @@ export default function OnboardingPage() {
               À compléter ({etapes.filter((e) => !e.done).length})
             </button>
           </div>
-        </div>
+        </motion.header>
 
         {/* =========================================================================
             LISTE DES CARTES D'ÉTAPES (@blocks-so/onboarding-02 style)
             ========================================================================= */}
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3">
           {etapesAffichees.map((step, index) => {
             const isCompleted = step.done
             const isOpen = etapeOuverte === step.code
@@ -354,15 +357,20 @@ export default function OnboardingPage() {
             const absoluteIndex = etapes.findIndex((e) => e.code === step.code)
 
             return (
-              <div
+              <motion.div
                 key={step.code}
+                layout
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: Math.min(index * 0.035, 0.2) }}
+                whileHover={{ y: isOpen ? 0 : -3 }}
                 className={cn(
-                  'rounded-xl border transition-all duration-200 overflow-hidden',
+                  'group rounded-2xl border overflow-hidden transition-colors duration-300',
                   isOpen
-                    ? 'border-brand/40 bg-surface shadow-e2 ring-1 ring-brand/20'
+                    ? 'border-brand/50 bg-surface shadow-e3 ring-1 ring-brand/20'
                     : isCompleted
-                      ? 'border-line/70 bg-surface/80 hover:border-line-strong'
-                      : 'border-line bg-surface hover:border-line-strong shadow-e1'
+                      ? 'border-line/70 bg-surface/80 shadow-e1 hover:border-brand/30 hover:shadow-e2'
+                      : 'border-line bg-surface shadow-e1 hover:border-brand/35 hover:shadow-e2'
                 )}
               >
                 {/* En-tête de la carte d'étape */}
@@ -564,7 +572,7 @@ export default function OnboardingPage() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
+              </motion.div>
             )
           })}
         </div>
