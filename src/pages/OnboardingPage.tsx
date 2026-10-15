@@ -232,12 +232,32 @@ export default function OnboardingPage() {
   return (
     <div className="relative flex min-h-dvh flex-col items-center overflow-hidden px-4 py-6 sm:px-6 lg:py-10">
       <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-[radial-gradient(circle_at_50%_-20%,color-mix(in_srgb,var(--brand)_25%,transparent),transparent_68%)]" />
-      <div className="w-full max-w-6xl space-y-6">
+      <div className="w-full max-w-[1180px] space-y-7">
+        <nav aria-label="Étapes de configuration" className="flex gap-3 overflow-x-auto pb-1">
+          {etapes.slice(0, 5).map((step, index) => {
+            const isActive = etapeOuverte === step.code
+            return (
+              <button
+                key={step.code}
+                type="button"
+                onClick={() => setEtapeOuverte(step.code)}
+                className={cn(
+                  'shrink-0 rounded-2xl border px-5 py-3 text-base font-medium transition-all duration-200 sm:text-lg',
+                  isActive
+                    ? 'border-ink bg-ink text-background shadow-e2'
+                    : 'border-line bg-surface/70 text-ink-muted hover:border-ink/40 hover:bg-surface hover:text-ink'
+                )}
+              >
+                {step.title.replace(/^\d+\.\s*/, '').split(' — ')[0] || `Section ${index + 1}`}
+              </button>
+            )
+          })}
+        </nav>
 
         <motion.header
           initial={{ opacity: 0, y: -14 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-[1.75rem] border border-brand/20 bg-surface/90 p-6 shadow-e3 backdrop-blur-xl sm:p-8"
+          className="relative overflow-hidden rounded-2xl border border-line bg-surface/40 p-5 shadow-e1 sm:p-7"
         >
           <div className="absolute -right-24 -top-24 size-64 rounded-full bg-brand/10 blur-3xl" />
           <div className="relative flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
@@ -324,12 +344,12 @@ export default function OnboardingPage() {
               À compléter ({etapes.filter((e) => !e.done).length})
             </button>
           </div>
-        </div>
+        </motion.header>
 
         {/* =========================================================================
             LISTE DES CARTES D'ÉTAPES (@blocks-so/onboarding-02 style)
             ========================================================================= */}
-        <div className="grid gap-3 lg:grid-cols-2">
+        <div className="flex flex-col gap-3">
           {etapesAffichees.map((step, index) => {
             const isCompleted = step.done
             const isOpen = etapeOuverte === step.code
@@ -552,7 +572,7 @@ export default function OnboardingPage() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
+              </motion.div>
             )
           })}
         </div>
